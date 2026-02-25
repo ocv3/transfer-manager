@@ -3,9 +3,9 @@ from time import sleep
 import pexpect
 import re
 from utils.credentials import IliyaHPCCredentials
-from utils.file_tracker import record_complete_file, DownloadTracker
+from utils.file_tracker import DownloadTracker
 
-def download_file(file_path: str, log_dir: str) -> None:
+def download_file(file_path: str, log_dir: str, dwl_tracker: DownloadTracker) -> None:
     try:
         child = pexpect.spawn(
             command="rsync",
@@ -47,10 +47,10 @@ def download_file(file_path: str, log_dir: str) -> None:
         )
 
         if resp == 1 or resp == 2:
-            record_complete_file(file_path)
+            dwl_tracker.record_download(file_path)
             child.close(force=True)
         elif resp == 0:
-            record_complete_file(file_path, missing=True)
+            dwl_tracker.record_download(file_path, missing=True)
             child.close(force=True)
 
     except Exception as e:
@@ -76,13 +76,14 @@ if __name__ == "__main__":
                 raise e
 
             if os.path.exists(f"/home/ubuntu/volume-mount/full-transfer/{file}"):
-                record_complete_file(file)
+                download_tracker.record_download(file)
         else:
             for e_count in range(10):
                 try:
                     download_file(
                         file_path=file,
                         log_dir="/home/ubuntu/transfer/logs",
+                        dwl_tracker=download_tracker
                     )
                     break
                 except Exception as e:
