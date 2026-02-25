@@ -20,10 +20,7 @@ class DownloadTracker:
         done_files = get_complete_list()
         self.done_count = len(done_files)
         self.total_count = len(self.file_list)
-
-        for file in done_files:
-            if self.file_list[0] == file or file.endswith("[MISSING]"):
-                self.file_list.pop(0)
+        self.file_list = self.file_list[self.done_count:]
 
     def record_download(self, file_path:str, missing:bool = False) -> None:
         record_complete_file(file_path, missing)
@@ -31,7 +28,7 @@ class DownloadTracker:
 
     @property
     def is_done(self) -> bool:
-        return self.done_count != self.total_count
+        return self.done_count == self.total_count
 
     def get_current_file(self) -> str:
         return self.file_list.pop(0)
