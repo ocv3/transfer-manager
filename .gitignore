@@ -1,0 +1,14 @@
+/exists.txt
+/file-list.txt
+/out-exists.txt
+/output.txt
+/logs/child.log
+/logs/complete.log
+/logs/logfile_read.log
+/logs/logfile_send.log
+/logs/res.log
+/logs/rsync.log
+/logs/rsync-out.txt
+/commands.md
+.idea/
+/utils/credentials.py
