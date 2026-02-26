@@ -62,12 +62,15 @@ def download_file(file_path: str, log_dir: str, dwl_tracker: DownloadTracker) ->
 if __name__ == "__main__":
     log("Loading File List")
 
-    download_tracker = DownloadTracker()
+    download_tracker = DownloadTracker(
+        dwl_dir = "/home/ubuntu/volume-mount/full-transfer/"
+    )
     while not download_tracker.is_done:
         file = download_tracker.get_current_file()
         log(f"Processing {download_tracker.done_count}: {file}")
         log(f"Files {download_tracker.done_count} / {download_tracker.total_count} : {download_tracker.percent_done}%")
-        log(f"Rate: {download_tracker.files_minute} files / minute (over the last minute): ~ {download_tracker.time_remaining} remaining")
+        log(f"Rate: {download_tracker.files_second} files / second (since start): ~ {download_tracker.time_remaining_fcount} remaining")
+        log(f"Rate: {download_tracker.bytes_second} bytes / second (since start): ~ {download_tracker.time_remaining_bytes} remaining")
 
         if file.endswith("/"):
             try:
@@ -93,5 +96,5 @@ if __name__ == "__main__":
                         raise e
                     else:
                         log(e)
-                        log("FAIL COUNT: ", e_count + 1)
+                        log(f"FAIL COUNT: {e_count + 1}")
                         sleep(600)
