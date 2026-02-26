@@ -1,3 +1,4 @@
+import time
 from typing import List
 
 def get_complete_list() -> List[str]:
@@ -21,10 +22,16 @@ class DownloadTracker:
         self.done_count = len(done_files)
         self.total_count = len(self.file_list)
         self.file_list = self.file_list[self.done_count:]
+        self._start_time = time.time()
+        self._minutes_since_start = 0
+        self._dwl_since = 0
+        self.files_minute = 0
 
     def record_download(self, file_path:str, missing:bool = False) -> None:
         record_complete_file(file_path, missing)
         self.done_count += 1
+        self._dwl_since += 1
+        self._update_rate()
 
     @property
     def is_done(self) -> bool:
@@ -36,3 +43,10 @@ class DownloadTracker:
     @property
     def percent_done(self):
         return self.done_count / self.total_count * 100
+
+    def _update_rate(self):
+        mins_since_start = int((time.time() - self._start_time) / 60)
+        if self._minutes_since_start < mins_since_start:
+            self.files_minute = self._dwl_since
+            self._dwl_since = 0
+            self._minutes_since_start = mins_since_start

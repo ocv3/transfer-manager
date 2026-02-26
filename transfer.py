@@ -4,6 +4,7 @@ import pexpect
 import re
 from utils.credentials import IliyaHPCCredentials
 from utils.file_tracker import DownloadTracker
+from utils.logger import log
 
 def download_file(file_path: str, log_dir: str, dwl_tracker: DownloadTracker) -> None:
     try:
@@ -54,24 +55,25 @@ def download_file(file_path: str, log_dir: str, dwl_tracker: DownloadTracker) ->
             child.close(force=True)
 
     except Exception as e:
-        print(e)
+        log(e)
         raise e
 
 
 if __name__ == "__main__":
-    print("Loading File List")
+    log("Loading File List")
 
     download_tracker = DownloadTracker()
     while not download_tracker.is_done:
         file = download_tracker.get_current_file()
-        print(f"Processing {download_tracker.done_count}: {file}")
-        print(f"{download_tracker.done_count}/{download_tracker.total_count}:{download_tracker.percent_done}")
+        log(f"Processing {download_tracker.done_count}: {file}")
+        log(f"Files {download_tracker.done_count} / {download_tracker.total_count} : {download_tracker.percent_done}%")
+        log(f"Rate: {download_tracker.files_minute} files / minute")
 
         if file.endswith("/"):
             try:
                 os.makedirs(f"/home/ubuntu/volume-mount/full-transfer/{file}")
             except OSError:
-                print("Directory already exists")
+                log("Directory already exists")
             except Exception as e:
                 raise e
 
@@ -90,6 +92,6 @@ if __name__ == "__main__":
                     if e_count == 9:
                         raise e
                     else:
-                        print(e)
-                        print("FAIL COUNT: ", e_count + 1)
+                        log(e)
+                        log("FAIL COUNT: ", e_count + 1)
                         sleep(600)
