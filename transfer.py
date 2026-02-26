@@ -67,7 +67,7 @@ if __name__ == "__main__":
         file = download_tracker.get_current_file()
         log(f"Processing {download_tracker.done_count}: {file}")
         log(f"Files {download_tracker.done_count} / {download_tracker.total_count} : {download_tracker.percent_done}%")
-        log(f"Rate: {download_tracker.files_minute} files / minute")
+        log(f"Rate: {download_tracker.files_minute} files / minute (over the last minute): ~ {download_tracker.time_remaining} remaining")
 
         if file.endswith("/"):
             try:

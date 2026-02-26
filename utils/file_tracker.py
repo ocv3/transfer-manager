@@ -1,3 +1,4 @@
+import datetime
 import time
 from typing import List
 
@@ -50,3 +51,8 @@ class DownloadTracker:
             self.files_minute = self._dwl_since
             self._dwl_since = 0
             self._minutes_since_start = mins_since_start
+
+    @property
+    def time_remaining(self):
+        minutes_remaining = (self.total_count - self.done_count) / self.files_minute
+        return datetime.timedelta(minutes=minutes_remaining)
