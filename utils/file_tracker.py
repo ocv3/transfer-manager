@@ -1,7 +1,7 @@
 import datetime
 import os
 import time
-from typing import List
+from typing import List, Optional
 
 
 def get_complete_list() -> List[str]:
@@ -41,11 +41,12 @@ class DownloadTracker:
         self.files_second = 0
         self.bytes_second = 0
 
-    def record_download(self, file_path:str, missing:bool = False) -> None:
+    def record_download(self, file_path: str, dest_path: Optional[str], missing: bool = False) -> None:
         record_complete_file(file_path, missing)
         self.done_count += 1
         self._dwl_since += 1
-        self._curr_size += self._calc_file_size(file_path)
+        if dest_path:
+            self._curr_size += self._calc_file_size(dest_path)
         self._update_rate()
 
     @property

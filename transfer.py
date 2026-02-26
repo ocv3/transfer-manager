@@ -6,6 +6,7 @@ from utils.credentials import IliyaHPCCredentials
 from utils.file_tracker import DownloadTracker
 from utils.logger import log
 
+
 def download_file(file_path: str, log_dir: str, dwl_tracker: DownloadTracker) -> None:
     try:
         child = pexpect.spawn(
@@ -48,11 +49,18 @@ def download_file(file_path: str, log_dir: str, dwl_tracker: DownloadTracker) ->
         )
 
         if resp == 1 or resp == 2:
-            dwl_tracker.record_download(file_path)
-            child.close(force=True)
+            dwl_tracker.record_download(
+                file_path=file_path,
+                dest_path=f"/home/ubuntu/volume-mount/full-transfer/{file_path}",
+                missing=False
+            )
         elif resp == 0:
-            dwl_tracker.record_download(file_path, missing=True)
-            child.close(force=True)
+            dwl_tracker.record_download(
+                file_path=file_path,
+                dest_path=None,
+                missing=True
+            )
+        child.close(force=True)
 
     except Exception as e:
         log(e)
@@ -63,7 +71,7 @@ if __name__ == "__main__":
     log("Loading File List")
 
     download_tracker = DownloadTracker(
-        dwl_dir = "/home/ubuntu/volume-mount/full-transfer/"
+        dwl_dir="/home/ubuntu/volume-mount/full-transfer/"
     )
     while not download_tracker.is_done:
         file = download_tracker.get_current_file()
@@ -81,7 +89,7 @@ if __name__ == "__main__":
                 raise e
 
             if os.path.exists(f"/home/ubuntu/volume-mount/full-transfer/{file}"):
-                download_tracker.record_download(file)
+                download_tracker.record_download(file, None, False)
         else:
             for e_count in range(10):
                 try:
