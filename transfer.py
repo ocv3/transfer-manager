@@ -105,6 +105,7 @@ if __name__ == "__main__":
                     break
                 except Exception as e:
                     if e_count == 9:
+                        log(e)
                         raise e
                     else:
                         log(e)
