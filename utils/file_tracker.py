@@ -54,5 +54,7 @@ class DownloadTracker:
 
     @property
     def time_remaining(self):
+        if self.files_minute == 0:
+            return "N/A"
         minutes_remaining = (self.total_count - self.done_count) / self.files_minute
         return datetime.timedelta(minutes=minutes_remaining)
