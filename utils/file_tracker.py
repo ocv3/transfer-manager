@@ -61,7 +61,7 @@ class DownloadTracker:
         return self.done_count / self.total_count * 100
 
     def _update_rate(self):
-        seconds_since_start = max(int(time.time() - self._start_time), 1)
+        seconds_since_start = self.seconds_since_start
         self.files_second = self._dwl_since / seconds_since_start
         self.bytes_second = self._size_since_start / seconds_since_start
 
@@ -95,3 +95,15 @@ class DownloadTracker:
         if not os.path.islink(path):
             return os.path.getsize(path)
         return 0
+
+    @property
+    def seconds_since_start(self):
+        return max(int(time.time() - self._start_time), 1)
+
+    @property
+    def files_since_start(self):
+        return self._dwl_since
+
+    @property
+    def bytes_since_start(self):
+        return self._size_since_start
