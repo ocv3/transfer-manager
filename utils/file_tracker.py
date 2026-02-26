@@ -76,7 +76,7 @@ class DownloadTracker:
     def time_remaining_bytes(self):
         if self.bytes_second == 0:
             return "N/A"
-        seconds_remaining = (1.8723E+13 - self._curr_size) / self.bytes_second
+        seconds_remaining = (164684851608290 - self._curr_size) / self.bytes_second
         return datetime.timedelta(seconds=seconds_remaining)
 
     @property
