@@ -4,6 +4,7 @@ from time import sleep
 import pexpect
 import re
 from utils.credentials import IliyaHPCCredentials
+from utils.email import send_email
 from utils.file_tracker import DownloadTracker
 from utils.logger import log
 
@@ -106,6 +107,7 @@ if __name__ == "__main__":
                 except Exception as e:
                     if e_count == 9:
                         log(e)
+                        send_email('ov3@sanger.ac.uk', "TRANSFER STOPPED", e)
                         raise e
                     else:
                         log(e)
