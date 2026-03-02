@@ -13,8 +13,9 @@ from utils.logger import log
 def download_file(file_path: str, log_dir: str, dwl_tracker: DownloadTracker) -> None:
     try:
         child = pexpect.spawn(
-            command="rsync",
+            command="/usr/bin/sudo",
             args=[
+                "rsync",
                 "-a",
                 "-vv",
                 "--inplace",
@@ -106,7 +107,7 @@ if __name__ == "__main__":
                         split = " -> "
                         file_ls = file.split(split)
                         file_ls.pop()
-                        file = split.join(file)
+                        file = split.join(file_ls)
                     download_file(
                         file_path=file,
                         log_dir="/home/ubuntu/transfer/logs",
