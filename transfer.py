@@ -102,6 +102,11 @@ if __name__ == "__main__":
         else:
             for e_count in range(10):
                 try:
+                    if " -> " in file:
+                        split = " -> "
+                        file_ls = file.split(split)
+                        file_ls.pop()
+                        file = split.join(file)
                     download_file(
                         file_path=file,
                         log_dir="/home/ubuntu/transfer/logs",
