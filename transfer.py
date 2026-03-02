@@ -77,13 +77,16 @@ if __name__ == "__main__":
     )
     while not download_tracker.is_done:
         file = download_tracker.get_current_file()
-        log(f"Processing {download_tracker.done_count}: {file}")
-        log(f"Files {download_tracker.done_count} / {download_tracker.total_count} : {download_tracker.percent_done}%")
-        log(f"Running for {datetime.timedelta(seconds=download_tracker.seconds_since_start)}:")
-        log(f"\tFiles downloaded since: {download_tracker.files_since_start}")
-        log(f"\tBytes downloaded since: {download_tracker.bytes_since_start}")
-        log(f"Rate: {download_tracker.files_second} files / second (since start): ~ {download_tracker.time_remaining_fcount} remaining")
-        log(f"Rate: {download_tracker.bytes_second} bytes / second (since start): ~ {download_tracker.time_remaining_bytes} remaining")
+
+        log_step = (f"Processing {download_tracker.done_count}: {file}\n"
+                    f"Files {download_tracker.done_count} / {download_tracker.total_count} : {download_tracker.percent_done}%\n"
+                    f"Running for {datetime.timedelta(seconds=download_tracker.seconds_since_start)}:\n"
+                    f"\tFiles downloaded since: {download_tracker.files_since_start}\n"
+                    f"\tBytes downloaded since: {download_tracker.bytes_since_start}\n"
+                    f"Rate: {download_tracker.files_second} files / second (since start): ~ {download_tracker.time_remaining_fcount} remaining\n"
+                    f"Rate: {download_tracker.bytes_second} bytes / second (since start): ~ {download_tracker.time_remaining_bytes} remaining")
+
+        log(log_step)
 
         if file.endswith("/"):
             try:
@@ -107,7 +110,11 @@ if __name__ == "__main__":
                 except Exception as e:
                     if e_count == 9:
                         log(e)
-                        send_email('ov3@sanger.ac.uk', "TRANSFER STOPPED", e)
+                        send_email(
+                            'ov3@sanger.ac.uk',
+                            "TRANSFER STOPPED",
+                            f"One processing:\n{log_step}\n\n{e}"
+                        )
                         raise e
                     else:
                         log(e)
