@@ -1,6 +1,7 @@
 import datetime
 import os
 from time import sleep
+import byte_formatter
 import pexpect
 import re
 from utils.credentials import IliyaHPCCredentials
@@ -82,9 +83,9 @@ if __name__ == "__main__":
                     f"Files {download_tracker.done_count} / {download_tracker.total_count} : {download_tracker.percent_done}%\n"
                     f"Running for {datetime.timedelta(seconds=download_tracker.seconds_since_start)}:\n"
                     f"\tFiles downloaded since: {download_tracker.files_since_start}\n"
-                    f"\tBytes downloaded since: {download_tracker.bytes_since_start}\n"
+                    f"\tBytes downloaded since: {byte_formatter.format_size(download_tracker.bytes_since_start)}\n"
                     f"Rate: {download_tracker.files_second} files / second (since start): ~ {download_tracker.time_remaining_fcount} remaining\n"
-                    f"Rate: {download_tracker.bytes_second} bytes / second (since start): ~ {download_tracker.time_remaining_bytes} remaining")
+                    f"Rate: {byte_formatter.format_size(download_tracker.bytes_second)} / second (since start): ~ {download_tracker.time_remaining_bytes} remaining")
 
         log(log_step)
 
@@ -113,7 +114,7 @@ if __name__ == "__main__":
                         send_email(
                             'ov3@sanger.ac.uk',
                             "TRANSFER STOPPED",
-                            f"One processing:\n{log_step}\n\n{e}"
+                            f"On processing:\n{log_step}\n\n{e}"
                         )
                         raise e
                     else:
