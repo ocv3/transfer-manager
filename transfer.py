@@ -31,7 +31,7 @@ def download_file(file_path: str, log_dir: str, dwl_tracker: DownloadTracker) ->
         child.logfile_read = open(f"{log_dir}/logfile_read.log", "ab")
         child.logfile_send = open(f"{log_dir}/logfile_send.log", "ab")
 
-        child.expect(".*Password.*")
+        child.expect(".*(is525@rds.uis.cam.ac.uk) Password:.*")
         child.sendline(IliyaHPCCredentials.get_pwd())
 
         resp = child.expect_list(
