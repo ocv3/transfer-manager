@@ -31,22 +31,27 @@ class DownloadTracker:
         self.total_count = len(self.file_list)
         self.file_list = self.file_list[self.done_count:]
 
-        self._start_time = time.time()
+        self._absolute_start_time = float(datetime.datetime(year=2026,month=2,day=23).timestamp())
+
+        self._script_start_time = time.time()
         self._dwl_since = 0
 
         size = self._full_size_dir()
         self._size_at_start = size
-        self._curr_size = size
+        self.curr_size = size
 
         self.files_second = 0
         self.bytes_second = 0
+
+        self.abs_files_second = 0
+        self.abs_bytes_second = 0
 
     def record_download(self, file_path: str, dest_path: Optional[str], missing: bool = False) -> None:
         record_complete_file(file_path, missing)
         self.done_count += 1
         self._dwl_since += 1
         if dest_path:
-            self._curr_size += self._calc_file_size(dest_path)
+            self.curr_size += self._calc_file_size(dest_path)
         self._update_rate()
 
     @property
@@ -65,6 +70,9 @@ class DownloadTracker:
         self.files_second = self._dwl_since / seconds_since_start
         self.bytes_second = self._size_since_start / seconds_since_start
 
+        self.abs_files_second = self.done_count / self.abs_seconds_since_start
+        self.abs_bytes_second = self.curr_size / self.abs_seconds_since_start
+
     @property
     def time_remaining_fcount(self):
         if self.files_second == 0:
@@ -76,12 +84,27 @@ class DownloadTracker:
     def time_remaining_bytes(self):
         if self.bytes_second == 0:
             return "N/A"
-        seconds_remaining = (164684851608290 - self._curr_size) / self.bytes_second
+        seconds_remaining = (164684851608290 - self.curr_size) / self.bytes_second
         return datetime.timedelta(seconds=seconds_remaining)
 
     @property
+    def abs_time_remaining_fcount(self):
+        if self.files_second == 0:
+            return "N/A"
+        seconds_remaining = (self.total_count - self.done_count) / self.abs_files_second
+        return datetime.timedelta(seconds=seconds_remaining)
+
+    @property
+    def abs_time_remaining_bytes(self):
+        if self.bytes_second == 0:
+            return "N/A"
+        seconds_remaining = (164684851608290 - self.curr_size) / self.abs_bytes_second
+        return datetime.timedelta(seconds=seconds_remaining)
+
+
+    @property
     def _size_since_start(self):
-        return self._curr_size - self._size_at_start
+        return self.curr_size - self._size_at_start
 
     def _full_size_dir(self):
         total_size = 0
@@ -98,7 +121,7 @@ class DownloadTracker:
 
     @property
     def seconds_since_start(self):
-        return max(int(time.time() - self._start_time), 1)
+        return max(int(time.time() - self._script_start_time), 1)
 
     @property
     def files_since_start(self):
@@ -107,3 +130,7 @@ class DownloadTracker:
     @property
     def bytes_since_start(self):
         return self._size_since_start
+
+    @property
+    def abs_seconds_since_start(self):
+        return max(int(time.time() - self._absolute_start_time), 1)

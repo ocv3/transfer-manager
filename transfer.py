@@ -82,7 +82,14 @@ if __name__ == "__main__":
 
         log_step = (f"Processing {download_tracker.done_count}: {file}\n"
                     f"Files {download_tracker.done_count} / {download_tracker.total_count} : {download_tracker.percent_done}%\n"
-                    f"Running for {datetime.timedelta(seconds=download_tracker.seconds_since_start)}:\n"
+                    
+                    f"Time Since download started {datetime.timedelta(seconds=download_tracker.abs_seconds_since_start)}:\n"
+                    f"\tFiles downloaded since: {download_tracker.done_count}\n"
+                    f"\tBytes downloaded since: {byte_formatter.format_size(download_tracker.curr_size)}\n"
+                    f"Rate: {download_tracker.abs_files_second} files / second (since start): ~ {download_tracker.abs_time_remaining_fcount} remaining\n"
+                    f"Rate: {byte_formatter.format_size(download_tracker.abs_bytes_second)} / second (since start): ~ {download_tracker.abs_time_remaining_bytes} remaining\n"
+                    
+                    f"Script running for {datetime.timedelta(seconds=download_tracker.seconds_since_start)}:\n"
                     f"\tFiles downloaded since: {download_tracker.files_since_start}\n"
                     f"\tBytes downloaded since: {byte_formatter.format_size(download_tracker.bytes_since_start)}\n"
                     f"Rate: {download_tracker.files_second} files / second (since start): ~ {download_tracker.time_remaining_fcount} remaining\n"
