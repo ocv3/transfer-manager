@@ -49,7 +49,7 @@ def download_file(file_path: str, log_dir: str, dwl_tracker: DownloadTracker) ->
                 rb".*uptodate.*",
                 rb".*data=.*"
             ],
-            timeout=1300
+            timeout=3600
         )
 
         if resp == 1 or resp == 2:
@@ -73,6 +73,7 @@ def download_file(file_path: str, log_dir: str, dwl_tracker: DownloadTracker) ->
 
 if __name__ == "__main__":
     log("Loading File List")
+    missing_files = 0
 
     download_tracker = DownloadTracker(
         dwl_dir="/home/ubuntu/volume-mount/full-transfer/"
@@ -124,12 +125,23 @@ if __name__ == "__main__":
                 except Exception as e:
                     if e_count == 9:
                         log(e)
-                        send_email(
-                            'ov3@sanger.ac.uk',
-                            "TRANSFER STOPPED",
-                            f"On processing:\n{log_step}\n\n{e}"
-                        )
-                        raise e
+                        missing_files+=1
+
+                        if missing_files <= 10:
+                            download_tracker.record_download(file, None, True)
+                            send_email(
+                                'ov3@sanger.ac.uk',
+                                "TRANSFER WARNING: MISSING FILE WARNING",
+                                f"On processing:\n{log_step}\n\n{e}"
+                            )
+                        else:
+                            send_email(
+                                'ov3@sanger.ac.uk',
+                                "TRANSFER STOPPED",
+                                f"On processing:\n{log_step}\n\n{e}"
+                            )
+                            raise e
+
                     else:
                         log(e)
                         log(f"FAIL COUNT: {e_count + 1}")
