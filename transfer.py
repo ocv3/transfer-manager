@@ -68,8 +68,6 @@ def download_file(file_path: str, log_dir: str, whole_file: bool) -> Tuple[str, 
             timeout=3600
         )
 
-        child.close(force=True)
-
         if resp == 1 or resp == 2:
             return file_path, f"/home/ubuntu/volume-mount/full-transfer/{file_path}"
         elif resp == 0:
@@ -83,6 +81,11 @@ def download_file(file_path: str, log_dir: str, whole_file: bool) -> Tuple[str, 
         log(e)
         raise e
 
+    finally:
+        try:
+            child.close(force=True)
+        except NameError:
+            pass
 
 if __name__ == "__main__":
     log("Loading File List")
