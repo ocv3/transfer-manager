@@ -172,6 +172,14 @@ if __name__ == "__main__":
                             raise e
 
                     else:
-                        log(e)
-                        log(f"FAIL COUNT: {e_count + 1}")
+                        text_to_log = (f"Processing {download_tracker.done_count}: {file}\n"
+                                       f"Files {download_tracker.done_count} / {download_tracker.total_count} : {download_tracker.percent_done}%\n"
+
+                                       f"Time Since download started {datetime.timedelta(seconds=download_tracker.abs_seconds_since_start)}:\n"
+                                       f"\tFiles downloaded since: {download_tracker.done_count}\n"
+                                       f"\tBytes downloaded since: {byte_formatter.format_size(download_tracker.curr_size)}\n"
+                                       f"Rate: {download_tracker.abs_files_second} files / second (since start): ~ {download_tracker.abs_time_remaining_fcount} remaining\n"
+                                       f"Rate: {byte_formatter.format_size(download_tracker.abs_bytes_second)} / second (since start): ~ {download_tracker.abs_time_remaining_bytes} remaining\n"
+                                       f"FAIL COUNT: {e_count + 1}"
+                                       f"ERROR:\n{e}")
                         sleep(600)
