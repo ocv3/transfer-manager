@@ -12,13 +12,16 @@ from utils.file_tracker import DownloadTracker
 from utils.logger import log
 
 class DataStreamError(Exception):
-    pass
+    def __init__(self):
+        super().__init__("Data Stream (Code 12) Error")
 
 class NotFoundError(Exception):
-    pass
+    def __init__(self):
+        super().__init__("File not found on remote error")
 
-class DidNotComplete(Exception):
-    pass
+class TimeoutError(Exception):
+    def __init__(self):
+        super().__init__("Download Timeout Error")
 
 def download_file(file_path: str, log_dir: str, whole_file: bool) -> Tuple[str, str]:
     try:
@@ -75,7 +78,7 @@ def download_file(file_path: str, log_dir: str, whole_file: bool) -> Tuple[str, 
         elif resp == 3:
             raise DataStreamError
         else:
-            raise DidNotComplete
+            raise TimeoutError
 
     except Exception as e:
         log(e)
