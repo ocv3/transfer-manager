@@ -1,6 +1,8 @@
 import datetime
 import os
 from time import sleep
+from typing import Tuple
+
 import byte_formatter
 import pexpect
 import re
@@ -9,23 +11,36 @@ from utils.email import send_email
 from utils.file_tracker import DownloadTracker
 from utils.logger import log
 
+class DataStreamError(Exception):
+    pass
 
-def download_file(file_path: str, log_dir: str, dwl_tracker: DownloadTracker) -> None:
+class NotFoundError(Exception):
+    pass
+
+class DidNotComplete(Exception):
+    pass
+
+def download_file(file_path: str, log_dir: str, whole_file: bool) -> Tuple[str, str]:
     try:
+        args = [
+            "rsync",
+            "-a",
+            "-vv",
+            "--inplace",
+            "-P",
+            "-h",
+            "-r",
+            f"--log-file={log_dir}/rsync.log",
+            f"is525@rds.uis.cam.ac.uk:{file_path}",
+            f"/home/ubuntu/volume-mount/full-transfer/{file_path}"
+        ]
+
+        if whole_file:
+            args.insert(5, "-W")
+
         child = pexpect.spawn(
             command="/usr/bin/sudo",
-            args=[
-                "rsync",
-                "-a",
-                "-vv",
-                "--inplace",
-                "-P",
-                "-h",
-                "-r",
-                f"--log-file={log_dir}/rsync.log",
-                f"is525@rds.uis.cam.ac.uk:{file_path}",
-                f"/home/ubuntu/volume-mount/full-transfer/{file_path}"
-            ],
+            args=args,
             logfile=open(f"{log_dir}/child.log", "ab")
         )
         child.logfile_read = open(f"{log_dir}/logfile_read.log", "ab")
@@ -47,24 +62,22 @@ def download_file(file_path: str, log_dir: str, dwl_tracker: DownloadTracker) ->
             pattern=[
                 rb".*No such file or directory.*",
                 rb".*uptodate.*",
-                rb".*data=.*"
+                rb".*data=.*",
+                rb".*error in rsync protocol data stream.*"
             ],
             timeout=3600
         )
 
-        if resp == 1 or resp == 2:
-            dwl_tracker.record_download(
-                file_path=file_path,
-                dest_path=f"/home/ubuntu/volume-mount/full-transfer/{file_path}",
-                missing=False
-            )
-        elif resp == 0:
-            dwl_tracker.record_download(
-                file_path=file_path,
-                dest_path=None,
-                missing=True
-            )
         child.close(force=True)
+
+        if resp == 1 or resp == 2:
+            return file_path, f"/home/ubuntu/volume-mount/full-transfer/{file_path}"
+        elif resp == 0:
+            raise NotFoundError
+        elif resp == 3:
+            raise DataStreamError
+        else:
+            raise DidNotComplete
 
     except Exception as e:
         log(e)
@@ -109,20 +122,30 @@ if __name__ == "__main__":
             if os.path.exists(f"/home/ubuntu/volume-mount/full-transfer/{file}"):
                 download_tracker.record_download(file, None, False)
         else:
+            if " -> " in file:
+                split = " -> "
+                file_ls = file.split(split)
+                file_ls.pop()
+                file = split.join(file_ls)
+            whole_file = False
+
             for e_count in range(10):
                 try:
-                    if " -> " in file:
-                        split = " -> "
-                        file_ls = file.split(split)
-                        file_ls.pop()
-                        file = split.join(file_ls)
-                    download_file(
+                    file_path, dest_path = download_file(
                         file_path=file,
                         log_dir="/home/ubuntu/transfer/logs",
-                        dwl_tracker=download_tracker
+                        whole_file=whole_file
+                    )
+                    download_tracker.record_download(
+                        file_path=file_path,
+                        dest_path=dest_path,
+                        missing=False
                     )
                     break
                 except Exception as e:
+                    if isinstance(e, DataStreamError):
+                        whole_file = True
+
                     if e_count == 9:
                         log(e)
                         missing_files+=1
