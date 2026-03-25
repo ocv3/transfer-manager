@@ -46,8 +46,12 @@ class DownloadTracker:
         self.abs_files_second = 0
         self.abs_bytes_second = 0
 
+        self.missing_files_since_start = 0
+
     def record_download(self, file_path: str, dest_path: Optional[str], missing: bool = False) -> None:
         record_complete_file(file_path, missing)
+        if missing:
+            self.missing_files_since_start += 1
         self.done_count += 1
         self._dwl_since += 1
         if dest_path:

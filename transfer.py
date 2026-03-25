@@ -92,7 +92,6 @@ def download_file(file_path: str, log_dir: str, whole_file: bool) -> Tuple[str, 
 
 if __name__ == "__main__":
     log("Loading File List")
-    missing_files = 0
 
     download_tracker = DownloadTracker(
         dwl_dir="/home/ubuntu/volume-mount/full-transfer/"
@@ -150,19 +149,15 @@ if __name__ == "__main__":
                     break
                 except Exception as e:
                     if isinstance(e, DataStreamError):
+                        if whole_file:
+                            download_tracker.record_download(file, None, True)
+                            break
                         whole_file = True
 
                     if e_count == 9:
                         log(e)
-                        missing_files+=1
-
-                        if missing_files <= 10:
+                        if download_tracker.missing_files_since_start <= 100:
                             download_tracker.record_download(file, None, True)
-                            send_email(
-                                'ov3@sanger.ac.uk',
-                                "TRANSFER WARNING: MISSING FILE WARNING",
-                                f"On processing:\n{log_step}\n\n{e}"
-                            )
                         else:
                             send_email(
                                 'ov3@sanger.ac.uk',
@@ -180,6 +175,7 @@ if __name__ == "__main__":
                                        f"\tBytes downloaded since: {byte_formatter.format_size(download_tracker.curr_size)}\n"
                                        f"Rate: {download_tracker.abs_files_second} files / second (since start): ~ {download_tracker.abs_time_remaining_fcount} remaining\n"
                                        f"Rate: {byte_formatter.format_size(download_tracker.abs_bytes_second)} / second (since start): ~ {download_tracker.abs_time_remaining_bytes} remaining\n"
-                                       f"FAIL COUNT: {e_count + 1}"
+                                       f"FAIL COUNT: {e_count + 1}\n"
                                        f"ERROR:\n{e}")
+                        log(text_to_log)
                         sleep(600)
