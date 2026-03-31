@@ -178,4 +178,4 @@ if __name__ == "__main__":
                                        f"FAIL COUNT: {e_count + 1}\n"
                                        f"ERROR:\n{e}")
                         log(text_to_log)
-                        sleep(600)
+                        sleep((60 * e_count) + 10)
