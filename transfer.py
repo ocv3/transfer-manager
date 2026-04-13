@@ -23,7 +23,7 @@ class TimeoutError(Exception):
     def __init__(self):
         super().__init__("Download Timeout Error")
 
-def download_file(file_path: str, log_dir: str, whole_file: bool) -> Tuple[str, str]:
+def download_file(file_path: str, log_dir: str, whole_file: bool, retries=1) -> Tuple[str, str]:
     try:
         args = [
             "rsync",
@@ -68,7 +68,7 @@ def download_file(file_path: str, log_dir: str, whole_file: bool) -> Tuple[str, 
                 rb".*data=.*",
                 rb".*error in rsync protocol data stream.*"
             ],
-            timeout=3600
+            timeout=360 * retries
         )
 
         if resp == 1 or resp == 2:
@@ -139,7 +139,8 @@ if __name__ == "__main__":
                     file_path, dest_path = download_file(
                         file_path=file,
                         log_dir="/home/ubuntu/transfer/logs",
-                        whole_file=whole_file
+                        whole_file=whole_file,
+                        retries= e_count + 1
                     )
                     download_tracker.record_download(
                         file_path=file_path,
